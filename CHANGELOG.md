@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.0] - 2025-09-05
+### Added
+- A logo for the extension, referenced in `package.json` as `img/DropCommentsLogo.png`.
+
 ## [0.2.0] - 2025-09-04
 ### Added
 - Emoji toggle for AI-generated comments via `dropcomments.useEmojis` (default: false). When enabled, the prompt asks the AI to include relevant emojis sparingly.

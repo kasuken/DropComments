@@ -1,8 +1,12 @@
 {
   "name": "dropcomments",
   "displayName": "DropComments",
-  "description": "versionDropComments is a Visual Studio Code extension that helps you automatically add comments to your code using AI.",
-  "version": "0.2.0",
+  "description": "DropComments is a Visual Studio Code extension that helps you automatically add comments to your code using AI.",
+  "version": "0.3.0",
+  "icon": "img/DropCommentsLogo.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kasuken/DropComments.git"},
   "publisher": "emanuelebartolesi",
   "engines": {
     "vscode": "^1.103.0"

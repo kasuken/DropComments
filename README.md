@@ -1,7 +1,7 @@
 # DropComments
 
 <P align="center">
-  <img src="/img/DropCommentsLogo.png" alt="DropComments Logo" width="200"/>
+  <img src="https://github.com/kasuken/DropComments/blob/main/img/DropCommentsLogo.png?raw=true)" alt="DropComments Logo" width="200"/>
 
 DropComments is a Visual Studio Code extension that helps you automatically add comments to your code using AI. 
 The goal is to make your code more readable and maintainable with minimal effort.
