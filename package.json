@@ -1,0 +1,76 @@
+{
+  "name": "dropcomments",
+  "displayName": "DropComments",
+  "description": "versionDropComments is a Visual Studio Code extension that helps you automatically add comments to your code using AI.",
+  "version": "0.2.0",
+  "publisher": "emanuelebartolesi",
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "dropcomments.addComments",
+        "title": "DropComments: Add Comments to Selection"
+      }
+    ],
+    "configuration": {
+      "title": "DropComments",
+      "properties": {
+        "dropcomments.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API key used by DropComments.",
+          "scope": "application"
+        },
+        "dropcomments.model": {
+          "type": "string",
+          "default": "gpt-4o-mini",
+          "description": "OpenAI model to use for generating comments (future feature).",
+          "scope": "application"
+        },
+        "dropcomments.commentStyle": {
+          "type": "string",
+          "enum": ["succinct", "detailed"],
+          "default": "succinct",
+          "description": "Style of comments to generate (future feature).",
+          "scope": "application"
+        }
+        ,
+        "dropcomments.useEmojis": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include emojis in generated comments.",
+          "scope": "application"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "dependencies": {
+    "openai": "^4.67.3"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.103.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@typescript-eslint/eslint-plugin": "^8.39.0",
+    "@typescript-eslint/parser": "^8.39.0",
+    "eslint": "^9.32.0",
+    "typescript": "^5.9.2",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
