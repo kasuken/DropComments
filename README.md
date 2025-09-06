@@ -13,6 +13,7 @@ The goal is to make your code more readable and maintainable with minimal effort
 - Progress notifications during comment generation
 - Smart comment formatting based on language
 - Optional emoji-enhanced comments (toggle via setting)
+- **Right-click context menu integration for quick commenting**
 
 ## Requirements
 - An OpenAI API key (required for AI comment generation)
@@ -28,10 +29,19 @@ Install DropComments from the VS Code Marketplace (coming soon).
 3. Search for "DropComments"
 4. Enter your OpenAI API key in the "Api Key" field
 
+
 ## Usage
+### Command Palette
 1. Select the code you want to comment
 2. Open the Command Palette (Ctrl+Shift+P)
 3. Run "DropComments: Add Comments to Selection"
+4. Wait for the AI to generate comments
+5. Comments will be inserted above your selection
+
+### Context Menu (Right-Click)
+1. Select the code you want to comment
+2. Right-click in the editor
+3. Choose "Add Comments with DropComments" from the context menu
 4. Wait for the AI to generate comments
 5. Comments will be inserted above your selection
 
