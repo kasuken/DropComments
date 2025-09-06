@@ -6,6 +6,8 @@
 DropComments is a Visual Studio Code extension that helps you automatically add comments to your code using AI. 
 The goal is to make your code more readable and maintainable with minimal effort.
 
+You can find the extension on the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=emanuelebartolesi.dropcomments)
+
 ## Features
 - Automatically generate code comments with AI assistance
 - Support for 20+ programming languages with appropriate comment syntax
@@ -51,18 +53,21 @@ Tip: To include emojis in generated comments, enable Settings > DropComments: Us
 TypeScript, JavaScript, Python, Java, C#, C++, C, Go, Rust, PHP, Ruby, Perl, Bash, PowerShell, SQL, HTML, XML, CSS, SCSS, Sass, Less
 
 ## Settings
+## Settings
 - `dropcomments.apiKey`: Your OpenAI API key (required)
-- `dropcomments.model`: AI model to use (future feature, default: gpt-4o-mini)
-- `dropcomments.commentStyle`: Comment style preference (future feature, default: succinct)
+- `dropcomments.model`: **AI model to use for generating comments** (default: `gpt-4o-mini`). You can set this to any supported OpenAI model name to balance cost, speed, and quality.
+- `dropcomments.commentStyle`: **Comment style preference** (default: `succinct`). Choose `succinct` for concise comments focused on key logic, or `detailed` for more explanatory comments with rationale and context.
 - `dropcomments.useEmojis`: Include emojis in generated comments (default: false). When enabled, the AI is instructed to add relevant emojis sparingly for clarity.
 
-## Roadmap
-The initial release includes only basic functionalities, but future updates will bring:
-- Support for multiple AI models
-- Customizable comment styles and templates
-- Inline explanations and documentation generation
-- Integration with code review tools
-- Bulk commenting for entire files or projects
+## Features
+- Automatically generate code comments with AI assistance
+- Support for 20+ programming languages with appropriate comment syntax
+- Secure API key storage in VS Code settings
+- Progress notifications during comment generation
+- Smart comment formatting based on language
+- Optional emoji-enhanced comments (toggle via setting)
+- **Right-click context menu integration for quick commenting**
+- **Customizable AI model and comment style settings for full control over output**
 - Custom prompt templates
 
 Stay tuned for more impressive features!

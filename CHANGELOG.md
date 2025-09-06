@@ -1,13 +1,16 @@
 
-## [0.4.0] - 2025-09-06
+
+## [0.5.0] - 2025-09-06
 ### Added
-- **Editor context menu integration:** You can now right-click on selected code and choose "Add Comments with DropComments" for instant AI-powered commenting.
-- The context menu item only appears when there is an active text selection in the editor.
-- The context menu command uses the same logic, settings, and error handling as the Command Palette command.
-- No changes to existing settings or configuration required.
+- **Customizable AI model and comment style settings:**
+  - You can now set `dropcomments.model` in VS Code settings to select the OpenAI model used for comment generation (default: `gpt-4o-mini`).
+  - You can now set `dropcomments.commentStyle` to choose between `succinct` (concise) and `detailed` (explanatory) comment styles.
+- Both settings are respected for comments generated via command palette and context menu.
+- The extension defaults to `gpt-4o-mini` for model and `succinct` for comment style if not set.
+- No breaking changes; users who do not change settings experience the same behavior as before.
 
 ### Improved
-- Documentation updated to describe context menu usage and feature parity.
+- Documentation updated to describe model and comment style settings, their defaults, and effects.
 
 ---
 

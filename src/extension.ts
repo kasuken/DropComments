@@ -55,14 +55,22 @@ class AIClient {
 		}
 	}
 
-	private buildPrompt(language: string, selectedCode: string, useEmojis: boolean): string {
+	private buildPrompt(language: string, selectedCode: string, useEmojis: boolean, commentStyle: string): string {
 		const emojiInstruction = useEmojis
 			? "You MAY add occasional emojis in comments (never inside string literals or code)."
 			: "Do not use emojis.";
 
+		let styleInstruction = "";
+		if (commentStyle === "detailed") {
+			styleInstruction = "Make comments more detailed and explanatory, including rationale and context where helpful.";
+		} else {
+			styleInstruction = "Keep comments succinct and focused only on key logic.";
+		}
+
 		return [
 			"You are a senior developer helping document code.",
-			`Add clear, concise ${language} comments to the provided code.`,
+			`Add ${commentStyle} ${language} comments to the provided code.`,
+			styleInstruction,
 			"Do NOT comment on every single line",
 			"Comment ONLY where it adds value.",
 			"Comment ONLY key logic and complex sections.",
@@ -79,7 +87,7 @@ class AIClient {
 		].join('\n');
 	}
 
-	async generateComments(language: string, selectedCode: string, useEmojis: boolean): Promise<string> {
+	async generateComments(language: string, selectedCode: string, useEmojis: boolean, model: string, commentStyle: string): Promise<string> {
 		this.updateApiKey();
         
 		if (!this.openai) {
@@ -96,11 +104,11 @@ class AIClient {
 			outputChannel.appendLine(`Selection truncated from ${selectedCode.length} to ${maxChars} characters`);
 		}
 
-		const prompt = this.buildPrompt(language, truncatedCode, useEmojis);
+		const prompt = this.buildPrompt(language, truncatedCode, useEmojis, commentStyle);
         
 		try {
 			const response = await this.openai.chat.completions.create({
-				model: 'gpt-4o-mini',
+				model: model || 'gpt-4o-mini',
 				messages: [{ role: 'user', content: prompt }],
 				max_tokens: 500,
 				temperature: 0.3
@@ -187,6 +195,8 @@ async function addCommentsToSelection(): Promise<void> {
 	const languageId = editor.document.languageId;
 	const aiClient = new AIClient();
 	const useEmojis = config.get<boolean>('useEmojis', false);
+	const model = config.get<string>('model', 'gpt-4o-mini');
+	const commentStyle = config.get<string>('commentStyle', 'succinct');
 
 	try {
 		await vscode.window.withProgress({
@@ -195,9 +205,9 @@ async function addCommentsToSelection(): Promise<void> {
 			cancellable: false
 		}, async (progress) => {
 			progress.report({ increment: 0, message: 'Requesting AI...' });
-			
-			const aiRaw = await aiClient.generateComments(languageId, selectedText, useEmojis);
-			
+            
+			const aiRaw = await aiClient.generateComments(languageId, selectedText, useEmojis, model, commentStyle);
+            
 			progress.report({ increment: 50, message: 'Processing response...' });
 			const generatedCodeWithComments = sanitizeModelOutput(aiRaw);
 
@@ -214,7 +224,7 @@ async function addCommentsToSelection(): Promise<void> {
 		});
 
 		vscode.window.showInformationMessage('Comments inserted without disabling code.');
-		outputChannel.appendLine(`Commented code updated (${languageId}, ${selectedText.length} chars).`);
+		outputChannel.appendLine(`Commented code updated (${languageId}, ${selectedText.length} chars, model: ${model}, style: ${commentStyle}).`);
 	} catch (error: any) {
 		const errorMessage = error.message || 'Unknown error occurred';
 		vscode.window.showErrorMessage(`Failed to add comments: ${errorMessage}`);
