@@ -1,8 +1,15 @@
-# Changelog
 
-## [0.3.0] - 2025-09-05
+## [0.4.0] - 2025-09-06
 ### Added
-- A logo for the extension, referenced in `package.json` as `img/DropCommentsLogo.png`.
+- **Editor context menu integration:** You can now right-click on selected code and choose "Add Comments with DropComments" for instant AI-powered commenting.
+- The context menu item only appears when there is an active text selection in the editor.
+- The context menu command uses the same logic, settings, and error handling as the Command Palette command.
+- No changes to existing settings or configuration required.
+
+### Improved
+- Documentation updated to describe context menu usage and feature parity.
+
+---
 
 ## [0.2.0] - 2025-09-04
 ### Added

@@ -230,15 +230,16 @@ export function activate(context: vscode.ExtensionContext) {
 
 	outputChannel.appendLine('DropComments extension activated');
 
-	// Register the original hello world command
-	const helloWorldDisposable = vscode.commands.registerCommand('dropcomments.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World from DropComments!');
-	});
-
 	// Register the new add comments command
 	const addCommentsDisposable = vscode.commands.registerCommand('dropcomments.addComments', addCommentsToSelection);
 
-	context.subscriptions.push(helloWorldDisposable, addCommentsDisposable);
+	// Register the context menu alias command
+	const addCommentsContextDisposable = vscode.commands.registerCommand('dropcomments.addCommentsContext', () => {
+		outputChannel.appendLine('DropComments invoked via context menu');
+		return addCommentsToSelection();
+	});
+
+	context.subscriptions.push(addCommentsDisposable, addCommentsContextDisposable);
 
 	// Log configuration changes
 	const configWatcher = vscode.workspace.onDidChangeConfiguration((event) => {
