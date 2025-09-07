@@ -2,7 +2,7 @@
   "name": "dropcomments",
   "displayName": "DropComments",
   "description": "DropComments is a Visual Studio Code extension that helps you automatically add comments to your code using AI.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "icon": "img/DropCommentsLogo.png",
   "repository": {
     "type": "git",
@@ -42,20 +42,20 @@
         "dropcomments.apiKey": {
           "type": "string",
           "default": "",
-          "description": "OpenAI API key used by DropComments.",
+          "description": "API key used by DropComments.",
           "scope": "application"
         },
         "dropcomments.model": {
           "type": "string",
           "default": "gpt-4o-mini",
-          "description": "OpenAI model to use for generating comments (future feature).",
+          "description": "Model to use for generating comments.",
           "scope": "application"
         },
         "dropcomments.commentStyle": {
           "type": "string",
           "enum": ["succinct", "detailed"],
           "default": "succinct",
-          "description": "Style of comments to generate (future feature).",
+          "description": "Style of comments to generate.",
           "scope": "application"
         }
         ,
@@ -63,6 +63,12 @@
           "type": "boolean",
           "default": false,
           "description": "Include emojis in generated comments.",
+          "scope": "application"
+        },
+        "dropcomments.apiUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Optional base URL for the AI API (OpenAI-compatible). Leave empty to use the default OpenAI endpoint.",
           "scope": "application"
         }
       }

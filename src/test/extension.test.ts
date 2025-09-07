@@ -10,7 +10,7 @@ suite('DropComments Extension Test Suite', () => {
 
 	suiteSetup(async () => {
 		// Ensure extension is activated
-		const extension = vscode.extensions.getExtension('undefined_publisher.dropcomments');
+		const extension = vscode.extensions.getExtension('emanuelebartolesi.dropcomments');
 		if (extension && !extension.isActive) {
 			await extension.activate();
 		}
@@ -19,7 +19,7 @@ suite('DropComments Extension Test Suite', () => {
 	});
 
 	test('Extension should be present', () => {
-		assert.ok(vscode.extensions.getExtension('undefined_publisher.dropcomments'));
+		assert.ok(vscode.extensions.getExtension('emanuelebartolesi.dropcomments'));
 	});
 
 	test('Should register dropcomments.addComments command', async () => {
@@ -31,13 +31,13 @@ suite('DropComments Extension Test Suite', () => {
 		assert.ok(hasCommand, 'dropcomments.addComments command should be registered');
 	});
 
-	test('Should register dropcomments.helloWorld command', async () => {
+	test('Should register dropcomments.addCommentsContext command', async () => {
 		const commands = await vscode.commands.getCommands(true);
-		const hasCommand = commands.includes('dropcomments.helloWorld');
+		const hasCommand = commands.includes('dropcomments.addCommentsContext');
 		if (!hasCommand) {
 			console.log('Available commands:', commands.filter(cmd => cmd.includes('dropcomments')));
 		}
-		assert.ok(hasCommand, 'dropcomments.helloWorld command should be registered');
+		assert.ok(hasCommand, 'dropcomments.addCommentsContext command should be registered');
 	});
 
 	test('Configuration should have expected properties', () => {
@@ -47,11 +47,15 @@ suite('DropComments Extension Test Suite', () => {
 		assert.strictEqual(typeof config.get('apiKey'), 'string');
 		assert.strictEqual(typeof config.get('model'), 'string');
 		assert.strictEqual(typeof config.get('commentStyle'), 'string');
+		assert.strictEqual(typeof config.get('useEmojis'), 'boolean');
+		assert.strictEqual(typeof config.get('apiUrl'), 'string');
 		
 		// Test default values
 		assert.strictEqual(config.get('apiKey'), '');
 		assert.strictEqual(config.get('model'), 'gpt-4o-mini');
 		assert.strictEqual(config.get('commentStyle'), 'succinct');
+		assert.strictEqual(config.get('useEmojis'), false);
+		assert.strictEqual(config.get('apiUrl'), '');
 	});
 
 	test('Comment token mapping should work for common languages', () => {
