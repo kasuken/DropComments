@@ -36,22 +36,54 @@ const COMMENT_TOKENS: Record<string, { line: string; blockStart?: string; blockE
 class AIClient {
 	private openai: OpenAI | null = null;
 	private apiKey: string = '';
+	private apiUrl: string = '';
 
 	constructor() {
-		this.updateApiKey();
+		this.updateClient();
 	}
 
-	private updateApiKey(): void {
+	private updateClient(): void {
 		const config = vscode.workspace.getConfiguration('dropcomments');
 		const newApiKey = config.get<string>('apiKey', '');
+		const newApiUrl = config.get<string>('apiUrl', '');
 		
-		if (newApiKey !== this.apiKey) {
+		// Validate and normalize API URL
+		const normalizedApiUrl = this.validateAndNormalizeUrl(newApiUrl);
+		
+		if (newApiKey !== this.apiKey || normalizedApiUrl !== this.apiUrl) {
 			this.apiKey = newApiKey;
+			this.apiUrl = normalizedApiUrl;
+			
 			if (this.apiKey) {
-				this.openai = new OpenAI({ apiKey: this.apiKey });
+				const clientOptions: any = { apiKey: this.apiKey };
+				
+				if (this.apiUrl) {
+					clientOptions.baseURL = this.apiUrl;
+					outputChannel.appendLine(`Using custom AI endpoint: ${new URL(this.apiUrl).protocol}//${new URL(this.apiUrl).host}`);
+				}
+				
+				this.openai = new OpenAI(clientOptions);
 			} else {
 				this.openai = null;
 			}
+		}
+	}
+
+	private validateAndNormalizeUrl(url: string): string {
+		if (!url || !url.trim()) {
+			return '';
+		}
+		
+		try {
+			const parsedUrl = new URL(url.trim());
+			if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+				outputChannel.appendLine(`Invalid API URL protocol '${parsedUrl.protocol}'. Only http: and https: are supported. Falling back to default OpenAI endpoint.`);
+				return '';
+			}
+			return parsedUrl.toString();
+		} catch (error) {
+			outputChannel.appendLine(`Invalid API URL format: ${url}. Falling back to default OpenAI endpoint.`);
+			return '';
 		}
 	}
 
@@ -69,9 +101,8 @@ class AIClient {
 
 		return [
 			"You are a senior developer helping document code.",
-			`Add ${commentStyle} ${language} comments to the provided code.`,
+			`Add clear, concise ${language} comments to the provided code.`,
 			styleInstruction,
-			"Do NOT comment on every single line",
 			"Comment ONLY where it adds value.",
 			"Comment ONLY key logic and complex sections.",
 			"Return the ORIGINAL code with comments inserted.",
@@ -88,7 +119,7 @@ class AIClient {
 	}
 
 	async generateComments(language: string, selectedCode: string, useEmojis: boolean, model: string, commentStyle: string): Promise<string> {
-		this.updateApiKey();
+		this.updateClient();
         
 		if (!this.openai) {
 			throw new Error('OpenAI API key not configured');
@@ -121,6 +152,8 @@ class AIClient {
 
 			return content.trim();
 		} catch (error: any) {
+			const errorPrefix = this.apiUrl ? '[Custom endpoint] ' : '';
+			
 			if (error.status === 401) {
 				throw new Error('Invalid OpenAI API key. Please check your settings.');
 			} else if (error.status === 429) {
@@ -128,7 +161,7 @@ class AIClient {
 			} else if (error.status >= 500) {
 				throw new Error('OpenAI service temporarily unavailable. Please try again later.');
 			} else {
-				outputChannel.appendLine(`OpenAI API error: ${error.message}`);
+				outputChannel.appendLine(`${errorPrefix}OpenAI API error: ${error.message}`);
 				throw new Error(`Failed to generate comments: ${error.message}`);
 			}
 		}
@@ -205,9 +238,9 @@ async function addCommentsToSelection(): Promise<void> {
 			cancellable: false
 		}, async (progress) => {
 			progress.report({ increment: 0, message: 'Requesting AI...' });
-            
+			
 			const aiRaw = await aiClient.generateComments(languageId, selectedText, useEmojis, model, commentStyle);
-            
+			
 			progress.report({ increment: 50, message: 'Processing response...' });
 			const generatedCodeWithComments = sanitizeModelOutput(aiRaw);
 
@@ -224,7 +257,7 @@ async function addCommentsToSelection(): Promise<void> {
 		});
 
 		vscode.window.showInformationMessage('Comments inserted without disabling code.');
-		outputChannel.appendLine(`Commented code updated (${languageId}, ${selectedText.length} chars, model: ${model}, style: ${commentStyle}).`);
+		outputChannel.appendLine(`Commented code updated (${languageId}, ${selectedText.length} chars, model: ${model}, style: ${commentStyle})`);
 	} catch (error: any) {
 		const errorMessage = error.message || 'Unknown error occurred';
 		vscode.window.showErrorMessage(`Failed to add comments: ${errorMessage}`);
@@ -250,15 +283,6 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(addCommentsDisposable, addCommentsContextDisposable);
-
-	// Log configuration changes
-	const configWatcher = vscode.workspace.onDidChangeConfiguration((event) => {
-		if (event.affectsConfiguration('dropcomments')) {
-			outputChannel.appendLine('DropComments configuration changed');
-		}
-	});
-	
-	context.subscriptions.push(configWatcher);
 }
 
 // This method is called when your extension is deactivated

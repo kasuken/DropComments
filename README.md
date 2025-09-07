@@ -53,11 +53,24 @@ Tip: To include emojis in generated comments, enable Settings > DropComments: Us
 TypeScript, JavaScript, Python, Java, C#, C++, C, Go, Rust, PHP, Ruby, Perl, Bash, PowerShell, SQL, HTML, XML, CSS, SCSS, Sass, Less
 
 ## Settings
-## Settings
 - `dropcomments.apiKey`: Your OpenAI API key (required)
 - `dropcomments.model`: **AI model to use for generating comments** (default: `gpt-4o-mini`). You can set this to any supported OpenAI model name to balance cost, speed, and quality.
 - `dropcomments.commentStyle`: **Comment style preference** (default: `succinct`). Choose `succinct` for concise comments focused on key logic, or `detailed` for more explanatory comments with rationale and context.
 - `dropcomments.useEmojis`: Include emojis in generated comments (default: false). When enabled, the AI is instructed to add relevant emojis sparingly for clarity.
+- `dropcomments.apiUrl`: **Custom API URL** (optional). Set a custom base URL for the AI API to use local LLMs or alternative endpoints. Must be OpenAI Chat Completions-compatible. Leave empty to use the default OpenAI endpoint.
+
+## Custom API URL
+DropComments supports routing AI requests to custom endpoints, enabling the use of local LLMs or alternative AI providers:
+
+1. Open VS Code Settings (Ctrl+,)
+2. Search for "DropComments: Api Url"
+3. Enter your custom endpoint URL (e.g., `http://localhost:8080` for a local LLM)
+4. Ensure your endpoint is OpenAI Chat Completions-compatible
+5. Use your existing API key setting if required by your custom endpoint
+
+**Compatibility Note**: Custom endpoints must implement the OpenAI Chat Completions API format. Popular local LLM frameworks like Ollama, LM Studio, and text-generation-webui provide OpenAI-compatible endpoints.
+
+**Security**: Only use trusted endpoints. Your code will be sent to the configured URL for comment generation.
 
 ## Features
 - Automatically generate code comments with AI assistance

@@ -1,5 +1,21 @@
 
 
+## [0.6.0] - 2025-09-07
+### Added
+- **Custom API URL support for local LLMs and alternative endpoints:**
+  - You can now set `dropcomments.apiUrl` in VS Code settings to route AI requests to a custom endpoint.
+  - Supports local LLMs (Ollama, LM Studio, text-generation-webui) and OpenAI-compatible services.
+  - Automatic validation and fallback to default OpenAI endpoint for invalid URLs.
+  - Custom endpoint activity is logged to the DropComments output channel for debugging.
+- Works seamlessly with both Command Palette and context menu invocation.
+- No breaking changes; users who do not set a custom URL experience the same behavior as before.
+
+### Improved
+- Enhanced error handling with custom endpoint hints for easier troubleshooting.
+- Documentation updated with Custom API URL setup guide and compatibility notes.
+
+---
+
 ## [0.5.0] - 2025-09-06
 ### Added
 - **Customizable AI model and comment style settings:**
