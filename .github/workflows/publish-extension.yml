@@ -39,9 +39,9 @@ jobs:
       - name: Read package metadata
         id: get_meta
         run: |
-          echo "version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
-          echo "name=$(node -p \"require('./package.json').name\")" >> $GITHUB_OUTPUT
-          echo "vsix=$(node -p \"const p=require('./package.json'); console.log(`${p.name}-${p.version}.vsix`)\")" >> $GITHUB_OUTPUT
+          echo "version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+          echo "name=$(node -p \"require('./package.json').name\")" >> "$GITHUB_OUTPUT"
+          echo "vsix=$(node -p \"const p=require('./package.json'); p.name + '-' + p.version + '.vsix'\")" >> "$GITHUB_OUTPUT"
 
       - name: Upload VSIX artifact (optional)
         uses: actions/upload-artifact@v4
