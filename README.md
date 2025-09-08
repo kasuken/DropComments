@@ -77,6 +77,27 @@ DropComments supports routing AI requests to custom endpoints, enabling the use 
 
 **Security**: Only use trusted endpoints. Your code will be sent to the configured URL for comment generation.
 
+## Custom Prompt Template
+You can provide a custom prompt template for AI comment generation using the `dropcomments.promptTemplate` setting.
+
+- Leave empty to use the default prompt.
+- Supports variables:
+  - `{language}`: Language ID of the code
+  - `{code}`: Selected code
+  - `{style}`: Comment style instruction (succinct/detailed)
+  - `{emojiInstruction}`: Emoji usage instruction
+
+**Example template:**
+```
+You are an expert in {language}. Add comments to the following code:
+{style}
+{emojiInstruction}
+Code:
+{code}
+```
+
+Set your template in VS Code Settings > DropComments: Prompt Template.
+
 ## Features
 - Automatically generate code comments with AI assistance
 - Support for 20+ programming languages with appropriate comment syntax

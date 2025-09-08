@@ -1,4 +1,11 @@
+## [0.7.0] - 2025-09-08
+### Added
+- **Custom prompt template support:**
+  - New setting `dropcomments.promptTemplate` allows users to define a custom prompt for AI comment generation.
+  - Supports variables: `{language}`, `{code}`, `{style}`, `{emojiInstruction}`.
+  - If unset, the extension uses the default prompt logic.
 
+---
 
 ## [0.6.0] - 2025-09-07
 ### Added
