@@ -1,7 +1,8 @@
 # DropComments
 
-<P align="center">
-  <img src="https://github.com/kasuken/DropComments/blob/main/img/DropCommentsLogo.png?raw=true)" alt="DropComments Logo" width="200"/>
+<p align="center">
+  <img src="https://github.com/kasuken/DropComments/blob/main/img/DropCommentsLogo.png?raw=true)" alt="DropComments Logo" width="200" />
+</p>
 
 DropComments is a Visual Studio Code extension that helps you automatically add comments to your code using AI. 
 The goal is to make your code more readable and maintainable with minimal effort.
@@ -16,6 +17,10 @@ You can find the extension on the [VS Code Marketplace](https://marketplace.visu
 - Smart comment formatting based on language
 - Optional emoji-enhanced comments (toggle via setting)
 - **Right-click context menu integration for quick commenting**
+
+<p align="center">
+  <img width="704" height="305" alt="screenshot" src="https://github.com/user-attachments/assets/132b16e6-5b61-438c-87f9-dc5665c8f71d" />
+</p>
 
 ## Requirements
 - An OpenAI API key (required for AI comment generation)
