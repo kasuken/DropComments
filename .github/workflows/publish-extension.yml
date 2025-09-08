@@ -39,7 +39,7 @@ jobs:
       - name: Read package metadata
         id: get_meta
         run: |
-          node -e "const fs=require('fs'); const p=require('./package.json'); const out=process.env.GITHUB_OUTPUT; fs.appendFileSync(out, `version=${p.version}\n`); fs.appendFileSync(out, `name=${p.name}\n`); fs.appendFileSync(out, `vsix=${p.name}-${p.version}.vsix\n`);"
+          node -e "const fs=require('fs'); const p=require('./package.json'); const out=process.env.GITHUB_OUTPUT; fs.appendFileSync(out, 'version=' + p.version + '\n'); fs.appendFileSync(out, 'name=' + p.name + '\n'); fs.appendFileSync(out, 'vsix=' + p.name + '-' + p.version + '.vsix\n');"
 
       - name: Upload VSIX artifact (optional)
         uses: actions/upload-artifact@v4
