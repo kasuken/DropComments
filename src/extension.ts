@@ -87,36 +87,49 @@ class AIClient {
 		}
 	}
 
-	private buildPrompt(language: string, selectedCode: string, useEmojis: boolean, commentStyle: string): string {
-		const emojiInstruction = useEmojis
-			? "You MAY add occasional emojis in comments (never inside string literals or code)."
-			: "Do not use emojis.";
+	   private buildPrompt(language: string, selectedCode: string, useEmojis: boolean, commentStyle: string): string {
+		   const config = vscode.workspace.getConfiguration('dropcomments');
+		   const customTemplate = config.get<string>('promptTemplate', '');
 
-		let styleInstruction = "";
-		if (commentStyle === "detailed") {
-			styleInstruction = "Make comments more detailed and explanatory, including rationale and context where helpful.";
-		} else {
-			styleInstruction = "Keep comments succinct and focused only on key logic.";
-		}
+		   const emojiInstruction = useEmojis
+			   ? "You MAY add occasional emojis in comments (never inside string literals or code)."
+			   : "Do not use emojis.";
 
-		return [
-			"You are a senior developer helping document code.",
-			`Add clear, concise ${language} comments to the provided code.`,
-			styleInstruction,
-			"Comment ONLY where it adds value.",
-			"Comment ONLY key logic and complex sections.",
-			"Return the ORIGINAL code with comments inserted.",
-			"Do NOT wrap the entire selection in a single comment block.",
-			"Do NOT remove or reorder code.",
-			"Do NOT comment out executable code lines.",
-			"Use inline trailing comments sparingly; prefer preceding line comments for multi-line logic.",
-			emojiInstruction,
-			"Return ONLY the code (no markdown fences, no explanations outside comments).",
-			"",
-			"Code:",
-			selectedCode
-		].join('\n');
-	}
+		   let styleInstruction = "";
+		   if (commentStyle === "detailed") {
+			   styleInstruction = "Make comments more detailed and explanatory, including rationale and context where helpful.";
+		   } else {
+			   styleInstruction = "Keep comments succinct and focused only on key logic.";
+		   }
+
+		   if (customTemplate && customTemplate.trim()) {
+			   // Replace variables in the template
+			   return customTemplate
+				   .replace(/{language}/g, language)
+				   .replace(/{code}/g, selectedCode)
+				   .replace(/{style}/g, styleInstruction)
+				   .replace(/{emojiInstruction}/g, emojiInstruction);
+		   }
+
+		   // Default prompt logic
+		   return [
+			   "You are a senior developer helping document code.",
+			   `Add clear, concise ${language} comments to the provided code.`,
+			   styleInstruction,
+			   "Comment ONLY where it adds value.",
+			   "Comment ONLY key logic and complex sections.",
+			   "Return the ORIGINAL code with comments inserted.",
+			   "Do NOT wrap the entire selection in a single comment block.",
+			   "Do NOT remove or reorder code.",
+			   "Do NOT comment out executable code lines.",
+			   "Use inline trailing comments sparingly; prefer preceding line comments for multi-line logic.",
+			   emojiInstruction,
+			   "Return ONLY the code (no markdown fences, no explanations outside comments).",
+			   "",
+			   "Code:",
+			   selectedCode
+		   ].join('\n');
+	   }
 
 	async generateComments(language: string, selectedCode: string, useEmojis: boolean, model: string, commentStyle: string): Promise<string> {
 		this.updateClient();

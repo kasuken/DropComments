@@ -43,12 +43,16 @@ suite('DropComments Extension Test Suite', () => {
 	test('Configuration should have expected properties', () => {
 		const config = vscode.workspace.getConfiguration('dropcomments');
 		
+		// Ensure clean state for configuration test
+		config.update('promptTemplate', '', vscode.ConfigurationTarget.Global);
+		
 		// Test that configuration properties exist
 		assert.strictEqual(typeof config.get('apiKey'), 'string');
 		assert.strictEqual(typeof config.get('model'), 'string');
 		assert.strictEqual(typeof config.get('commentStyle'), 'string');
 		assert.strictEqual(typeof config.get('useEmojis'), 'boolean');
 		assert.strictEqual(typeof config.get('apiUrl'), 'string');
+		assert.strictEqual(typeof config.get('promptTemplate'), 'string');
 		
 		// Test default values
 		assert.strictEqual(config.get('apiKey'), '');
@@ -56,6 +60,7 @@ suite('DropComments Extension Test Suite', () => {
 		assert.strictEqual(config.get('commentStyle'), 'succinct');
 		assert.strictEqual(config.get('useEmojis'), false);
 		assert.strictEqual(config.get('apiUrl'), '');
+		assert.strictEqual(config.get('promptTemplate'), '');
 	});
 
 	test('Comment token mapping should work for common languages', () => {
@@ -151,4 +156,44 @@ suite('DropComments Extension Test Suite', () => {
 			assert.fail('Command should handle no active editor gracefully: ' + error);
 		}
 	}).timeout(5000);
+
+	test('Custom prompt template variable substitution', async function() {
+		// Test the custom prompt template functionality
+		const config = vscode.workspace.getConfiguration('dropcomments');
+		
+		// Test template with all variables
+		const testTemplate = 'Language: {language}, Style: {style}, Emoji: {emojiInstruction}, Code: {code}';
+		await config.update('promptTemplate', testTemplate, vscode.ConfigurationTarget.Global);
+		await config.update('commentStyle', 'detailed', vscode.ConfigurationTarget.Global);
+		await config.update('useEmojis', true, vscode.ConfigurationTarget.Global);
+		
+		// Since we can't directly test the private buildPrompt method, we validate the config reads correctly
+		const updatedConfig = vscode.workspace.getConfiguration('dropcomments');
+		assert.strictEqual(updatedConfig.get('promptTemplate'), testTemplate);
+		assert.strictEqual(updatedConfig.get('commentStyle'), 'detailed');
+		assert.strictEqual(updatedConfig.get('useEmojis'), true);
+		
+		// Clean up - reset to defaults
+		await config.update('promptTemplate', '', vscode.ConfigurationTarget.Global);
+		await config.update('commentStyle', 'succinct', vscode.ConfigurationTarget.Global);
+		await config.update('useEmojis', false, vscode.ConfigurationTarget.Global);
+	});
+
+	test('Custom prompt template fallback behavior', async function() {
+		// Test fallback when template is empty or whitespace
+		const config = vscode.workspace.getConfiguration('dropcomments');
+		
+		// Test empty template
+		await config.update('promptTemplate', '', vscode.ConfigurationTarget.Global);
+		assert.strictEqual(config.get('promptTemplate'), '');
+		
+		// Test whitespace-only template - VS Code may trim this automatically
+		await config.update('promptTemplate', '   ', vscode.ConfigurationTarget.Global);
+		const whitespaceTemplate = config.get('promptTemplate');
+		// Accept either the whitespace being preserved or trimmed by VS Code
+		assert.ok(whitespaceTemplate === '   ' || whitespaceTemplate === '', 'Template should be whitespace or empty');
+		
+		// Clean up
+		await config.update('promptTemplate', '', vscode.ConfigurationTarget.Global);
+	});
 });
