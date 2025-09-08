@@ -1,12 +1,17 @@
 name: Publish VS Code Extension
 
 on:
-  push:
+  # Publish only when a PR into main is merged
+  pull_request:
     branches:
       - main
+    types:
+      - closed
 
 jobs:
   publish:
+    # Ensure we only run on merged PRs (not just closed)
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -18,7 +23,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Install vsce
         run: npm install -g vsce
@@ -26,7 +31,17 @@ jobs:
       - name: Package extension
         run: vsce package
 
+      - name: Upload VSIX artifact (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: '*.vsix'
+          if-no-files-found: warn
+
       - name: Publish to Marketplace
-        run: vsce publish --pat ${{ secrets.VSCE_TOKEN }}
         env:
-          VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
+          # Map your repo secret to the env var that vsce expects
+          VSCE_PAT: ${{ secrets.VSCE_TOKEN }}
+        run: |
+          # vsce reads token from VSCE_PAT; no need to pass --pat explicitly
+          vsce publish
