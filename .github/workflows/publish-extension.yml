@@ -10,12 +10,17 @@ on:
 
 jobs:
   publish:
+    permissions:
+      contents: write
     # Ensure we only run on merged PRs (not just closed)
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Check out the base branch (e.g., main) so we build/publish the merged result
+          ref: ${{ github.event.pull_request.base.ref }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -31,12 +36,28 @@ jobs:
       - name: Package extension
         run: vsce package
 
+      - name: Read package metadata
+        id: get_meta
+        run: |
+          echo "version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+          echo "name=$(node -p \"require('./package.json').name\")" >> $GITHUB_OUTPUT
+          echo "vsix=$(node -p \"const p=require('./package.json'); console.log(`${p.name}-${p.version}.vsix`)\")" >> $GITHUB_OUTPUT
+
       - name: Upload VSIX artifact (optional)
         uses: actions/upload-artifact@v4
         with:
           name: vsix
           path: '*.vsix'
           if-no-files-found: warn
+
+      - name: Check VSCE token is provided
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_TOKEN }}
+        run: |
+          if [ -z "${VSCE_PAT}" ]; then
+            echo "::error::VSCE_TOKEN secret is not set. Add it in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
 
       - name: Publish to Marketplace
         env:
@@ -45,3 +66,13 @@ jobs:
         run: |
           # vsce reads token from VSCE_PAT; no need to pass --pat explicitly
           vsce publish
+
+      - name: Create GitHub Release and upload asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_meta.outputs.version }}
+          name: v${{ steps.get_meta.outputs.version }}
+          files: ${{ steps.get_meta.outputs.vsix }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
