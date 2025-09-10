@@ -50,14 +50,107 @@
       {
         "command": "dropcomments.addCommentsContext",
         "title": "Add Comments with DropComments"
+      },
+      {
+        "command": "dropcomments.stale.scanWorkspace",
+        "title": "Scan Workspace for Stale Comments",
+        "icon": "$(search)"
+      },
+      {
+        "command": "dropcomments.stale.refreshView",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "dropcomments.stale.openLocation",
+        "title": "Open File",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "dropcomments.stale.regenerate",
+        "title": "Regenerate Comment",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "dropcomments.stale.regenerateAll",
+        "title": "Regenerate All Comments",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "dropcomments.stale.apply",
+        "title": "Apply Changes",
+        "icon": "$(check)"
+      },
+      {
+        "command": "dropcomments.stale.dismiss",
+        "title": "Dismiss",
+        "icon": "$(close)"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dropcomments-stale",
+          "title": "Stale Comments",
+          "icon": "$(comment-unresolved)",
+          "when": "config.dropcomments.stale.enable"
+        }
+      ]
+    },
+    "views": {
+      "dropcomments-stale": [
+        {
+          "id": "dropcomments.staleComments",
+          "name": "Stale Comments",
+          "when": "config.dropcomments.stale.enable"
+        }
+      ]
+    },
     "menus": {
       "editor/context": [
         {
           "command": "dropcomments.addCommentsContext",
           "when": "editorTextFocus && editorHasSelection",
           "group": "1_modification@7"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "dropcomments.stale.scanWorkspace",
+          "when": "view == dropcomments.staleComments",
+          "group": "navigation@1"
+        },
+        {
+          "command": "dropcomments.stale.refreshView",
+          "when": "view == dropcomments.staleComments",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dropcomments.stale.regenerateAll",
+          "when": "view == dropcomments.staleComments",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "dropcomments.stale.openLocation",
+          "when": "view == dropcomments.staleComments && viewItem == staleComment",
+          "group": "inline@1"
+        },
+        {
+          "command": "dropcomments.stale.regenerate",
+          "when": "view == dropcomments.staleComments && viewItem == staleComment",
+          "group": "inline@2"
+        },
+        {
+          "command": "dropcomments.stale.apply",
+          "when": "view == dropcomments.staleComments && viewItem == staleCommentWithRegenerated",
+          "group": "inline@3"
+        },
+        {
+          "command": "dropcomments.stale.dismiss",
+          "when": "view == dropcomments.staleComments && viewItem =~ /staleComment/",
+          "group": "inline@4"
         }
       ]
     },
@@ -101,6 +194,69 @@
           "type": "string",
           "default": "",
           "description": "Custom prompt template for AI comment generation. Supports variables: {language}, {code}, {style}, {emojiInstruction}. Leave empty to use the default template.",
+          "scope": "application"
+        },
+        "dropcomments.stale.enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable stale comments detection and management.",
+          "scope": "application"
+        },
+        "dropcomments.stale.autoScanOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically scan for stale comments when workspace is opened (when stale feature is enabled).",
+          "scope": "application"
+        },
+        "dropcomments.stale.maxScanFiles": {
+          "type": "number",
+          "default": 5000,
+          "description": "Maximum number of files to scan for stale comments.",
+          "scope": "application"
+        },
+        "dropcomments.stale.scoreThreshold": {
+          "type": "number",
+          "default": 55,
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum staleness score to display comments (0-100).",
+          "scope": "application"
+        },
+        "dropcomments.stale.excludeGlobs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["**/node_modules/**", "**/dist/**", "**/build/**", "**/out/**", "**/.git/**", "**/coverage/**", "**/target/**", "**/bin/**", "**/obj/**"],
+          "description": "File patterns to exclude from stale comment scanning.",
+          "scope": "application"
+        },
+        "dropcomments.stale.batchConcurrency": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Number of concurrent AI requests for batch regeneration.",
+          "scope": "application"
+        },
+        "dropcomments.stale.commentOnlyRegeneration": {
+          "type": "boolean",
+          "default": true,
+          "description": "When regenerating, only update the comment text (not the surrounding code).",
+          "scope": "application"
+        },
+        "dropcomments.stale.showLowConfidence": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show items with scores within 10 points below the threshold.",
+          "scope": "application"
+        },
+        "dropcomments.stale.gitHistoryDepth": {
+          "type": "number",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Maximum number of git blame traversals for age heuristics.",
           "scope": "application"
         }
       }

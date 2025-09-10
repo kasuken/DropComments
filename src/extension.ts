@@ -2,9 +2,14 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import OpenAI from 'openai';
+import { StaleCommentsService } from './staleCommentsService';
+import { StaleCommentsTreeProvider } from './staleCommentsTreeProvider';
 
 // Output channel for logging
 let outputChannel: vscode.OutputChannel;
+let staleCommentsService: StaleCommentsService;
+let staleCommentsTreeProvider: StaleCommentsTreeProvider;
+let sharedAIClient: AIClient;
 
 // Language comment token mapping
 const COMMENT_TOKENS: Record<string, { line: string; blockStart?: string; blockEnd?: string }> = {
@@ -33,7 +38,7 @@ const COMMENT_TOKENS: Record<string, { line: string; blockStart?: string; blockE
 };
 
 // AI Client class
-class AIClient {
+export class AIClient {
 	private openai: OpenAI | null = null;
 	private apiKey: string = '';
 	private apiUrl: string = '';
@@ -41,6 +46,8 @@ class AIClient {
 	constructor() {
 		this.updateClient();
 	}
+
+	// ... rest of the class remains the same
 
 	private updateClient(): void {
 		const config = vscode.workspace.getConfiguration('dropcomments');
@@ -284,18 +291,169 @@ export function activate(context: vscode.ExtensionContext) {
 	outputChannel = vscode.window.createOutputChannel('DropComments');
 	context.subscriptions.push(outputChannel);
 
+	// Initialize shared AI client
+	sharedAIClient = new AIClient();
+
 	outputChannel.appendLine('DropComments extension activated');
 
-	// Register the new add comments command
+	// Register the original add comments commands
 	const addCommentsDisposable = vscode.commands.registerCommand('dropcomments.addComments', addCommentsToSelection);
-
-	// Register the context menu alias command
 	const addCommentsContextDisposable = vscode.commands.registerCommand('dropcomments.addCommentsContext', () => {
 		outputChannel.appendLine('DropComments invoked via context menu');
 		return addCommentsToSelection();
 	});
 
 	context.subscriptions.push(addCommentsDisposable, addCommentsContextDisposable);
+
+	// Initialize stale comments feature if enabled
+	const config = vscode.workspace.getConfiguration('dropcomments.stale');
+	if (config.get<boolean>('enable', false)) {
+		initializeStaleCommentsFeature(context);
+	}
+
+	// Watch for configuration changes to enable/disable stale comments
+	vscode.workspace.onDidChangeConfiguration(event => {
+		if (event.affectsConfiguration('dropcomments.stale.enable')) {
+			const newConfig = vscode.workspace.getConfiguration('dropcomments.stale');
+			if (newConfig.get<boolean>('enable', false)) {
+				if (!staleCommentsService) {
+					initializeStaleCommentsFeature(context);
+				}
+			}
+		}
+	}, null, context.subscriptions);
+}
+
+function initializeStaleCommentsFeature(context: vscode.ExtensionContext) {
+	// Initialize services
+	staleCommentsService = new StaleCommentsService(context, outputChannel);
+	staleCommentsTreeProvider = new StaleCommentsTreeProvider(staleCommentsService);
+
+	// Register tree view
+	const treeView = vscode.window.createTreeView('dropcomments.staleComments', {
+		treeDataProvider: staleCommentsTreeProvider,
+		showCollapseAll: true
+	});
+	context.subscriptions.push(treeView);
+
+	// Register stale comments commands
+	const scanWorkspaceCommand = vscode.commands.registerCommand('dropcomments.stale.scanWorkspace', async () => {
+		await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: 'Scanning workspace for stale comments...',
+			cancellable: true
+		}, async (progress, token) => {
+			await staleCommentsService.scanWorkspace(
+				(message, increment) => {
+					progress.report({ message, increment });
+				},
+				token
+			);
+			staleCommentsTreeProvider.refresh();
+		});
+	});
+
+	const refreshViewCommand = vscode.commands.registerCommand('dropcomments.stale.refreshView', () => {
+		staleCommentsTreeProvider.refresh();
+	});
+
+	const openLocationCommand = vscode.commands.registerCommand('dropcomments.stale.openLocation', async (item) => {
+		const document = await vscode.workspace.openTextDocument(item.filePath);
+		const editor = await vscode.window.showTextDocument(document);
+		editor.selection = new vscode.Selection(item.range.start, item.range.end);
+		editor.revealRange(item.range, vscode.TextEditorRevealType.InCenter);
+	});
+
+	const regenerateCommand = vscode.commands.registerCommand('dropcomments.stale.regenerate', async (item) => {
+		try {
+			await staleCommentsService.regenerate(item);
+			staleCommentsTreeProvider.updateItem(item);
+			vscode.window.showInformationMessage('Comment regenerated successfully');
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to regenerate comment: ${error}`);
+		}
+	});
+
+	const regenerateAllCommand = vscode.commands.registerCommand('dropcomments.stale.regenerateAll', async () => {
+		const items = staleCommentsService.getItems().filter(item => !item.regeneratedText);
+		if (items.length === 0) {
+			vscode.window.showInformationMessage('No comments need regeneration');
+			return;
+		}
+
+		const confirm = await vscode.window.showWarningMessage(
+			`This will regenerate ${items.length} comments. Continue?`,
+			'Yes', 'No'
+		);
+
+		if (confirm === 'Yes') {
+			await vscode.window.withProgress({
+				location: vscode.ProgressLocation.Notification,
+				title: 'Regenerating comments...',
+				cancellable: false
+			}, async (progress) => {
+				const config = vscode.workspace.getConfiguration('dropcomments.stale');
+				const concurrency = config.get<number>('batchConcurrency', 3);
+				
+				for (let i = 0; i < items.length; i += concurrency) {
+					const batch = items.slice(i, i + concurrency);
+					await Promise.allSettled(batch.map(item => staleCommentsService.regenerate(item)));
+					
+					progress.report({
+						message: `Processed ${Math.min(i + concurrency, items.length)} of ${items.length}`,
+						increment: (concurrency / items.length) * 100
+					});
+				}
+				
+				staleCommentsTreeProvider.refresh();
+			});
+		}
+	});
+
+	const applyCommand = vscode.commands.registerCommand('dropcomments.stale.apply', async (item) => {
+		try {
+			await staleCommentsService.apply(item);
+			staleCommentsTreeProvider.removeItem(item);
+			vscode.window.showInformationMessage('Changes applied successfully');
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to apply changes: ${error}`);
+		}
+	});
+
+	const dismissCommand = vscode.commands.registerCommand('dropcomments.stale.dismiss', async (item) => {
+		await staleCommentsService.dismiss(item);
+		staleCommentsTreeProvider.removeItem(item);
+	});
+
+	// Register all commands
+	context.subscriptions.push(
+		scanWorkspaceCommand,
+		refreshViewCommand,
+		openLocationCommand,
+		regenerateCommand,
+		regenerateAllCommand,
+		applyCommand,
+		dismissCommand
+	);
+
+	// Auto-scan on startup if enabled
+	const autoScan = vscode.workspace.getConfiguration('dropcomments.stale').get<boolean>('autoScanOnOpen', true);
+	if (autoScan && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+		// Delay auto-scan to let workspace fully load
+		setTimeout(() => {
+			vscode.commands.executeCommand('dropcomments.stale.scanWorkspace');
+		}, 2000);
+	}
+
+	outputChannel.appendLine('Stale comments feature initialized');
+}
+
+// Export function to get the shared AI client for other services
+export function getSharedAIClient(): AIClient {
+	if (!sharedAIClient) {
+		throw new Error('AI client not initialized. Extension must be activated first.');
+	}
+	return sharedAIClient;
 }
 
 // This method is called when your extension is deactivated

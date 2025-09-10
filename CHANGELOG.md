@@ -1,3 +1,26 @@
+## [0.7.3] - 2025-09-10
+### Added
+- **🆕 Stale Comments Sidebar Feature:**
+  - New dedicated sidebar for detecting and managing potentially outdated code comments across your workspace.
+  - Intelligent heuristic-based detection using symbol drift analysis, function signature changes, and comment age scoring.
+  - AI-powered comment regeneration with specialized prompts for updating stale comments.
+  - File-grouped tree view with score indicators and detailed staleness reasons.
+  - Batch operations: scan workspace, regenerate all, or handle comments individually.
+  - Performance optimized: chunked processing, file size limits, and progress reporting.
+  - **9 new configuration settings** under `dropcomments.stale.*` for full customization.
+  - **7 new commands** for workspace scanning, comment regeneration, and management.
+  - Seamlessly integrates with existing AI models and custom API endpoints.
+  - **Opt-in feature** - enable via `dropcomments.stale.enable: true` setting.
+
+### Technical Implementation
+- Multi-language support using existing comment token mapping (20+ languages).
+- Context-aware AI integration with comment-only regeneration mode.
+- Workspace file system monitoring for incremental updates.
+- Graceful degradation when Git is unavailable (fallback to file timestamps).
+- Safe edit transactions with conflict detection and user confirmation.
+
+---
+
 ## [0.7.0] - 2025-09-08
 ### Added
 - **Custom prompt template support:**

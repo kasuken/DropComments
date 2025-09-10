@@ -1,7 +1,7 @@
 ---
 description: 'Translate PRDs into technical designs and step-by-step implementation guides.'
 tools: ['codebase', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'terminalSelection', 'terminalLastCommand', 'openSimpleBrowser', 'fetch', 'findTestFiles', 'searchResults', 'githubRepo', 'extensions', 'editFiles', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'github']
-model: GPT-5 (Preview)
+model: GPT-5
 ---
 You are the **Software Architect** for this application.
 

@@ -54,15 +54,45 @@ Install DropComments from the VS Code Marketplace (coming soon).
 
 Tip: To include emojis in generated comments, enable Settings > DropComments: Use Emojis.
 
+### Stale Comments Sidebar (New!)
+Automatically detect and regenerate potentially outdated comments across your entire workspace:
+
+1. **Enable the feature**: Set `dropcomments.stale.enable: true` in VS Code settings
+2. **Access the sidebar**: Look for "Stale Comments" in the Activity Bar (when enabled)
+3. **Scan your workspace**: Click "Scan Workspace" or use auto-scan on startup
+4. **Review detected issues**: Browse stale comments grouped by file with staleness scores
+5. **Regenerate comments**: Use AI to update individual comments or batch process all
+6. **Apply changes**: Preview and apply regenerated comments safely to your code
+
+**Key Features:**
+- **Intelligent Detection**: Analyzes symbol drift, function signature changes, comment age, and code complexity
+- **Performance Optimized**: Handles large workspaces efficiently with chunked processing
+- **Safe Operations**: Preview changes before applying, with conflict detection
+- **Flexible Workflow**: Scan manually or automatically, regenerate individually or in batches
+- **Highly Configurable**: 9 settings to customize thresholds, exclusions, and behavior
+
 ### Supported Languages
-TypeScript, JavaScript, Python, Java, C#, C++, C, Go, Rust, PHP, Ruby, Perl, Bash, PowerShell, SQL, HTML, XML, CSS, SCSS, Sass, Less
+TypeScript, JavaScript, Python, Java, C#, VB.NET, C++, C, Go, Rust, PHP, Ruby, Perl, Bash, PowerShell, SQL, HTML, XML, CSS, SCSS, Sass, Less
 
 ## Settings
+
+### Core Settings
 - `dropcomments.apiKey`: Your OpenAI API key (required)
 - `dropcomments.model`: **AI model to use for generating comments** (default: `gpt-4o-mini`). You can set this to any supported OpenAI model name to balance cost, speed, and quality.
 - `dropcomments.commentStyle`: **Comment style preference** (default: `succinct`). Choose `succinct` for concise comments focused on key logic, or `detailed` for more explanatory comments with rationale and context.
 - `dropcomments.useEmojis`: Include emojis in generated comments (default: false). When enabled, the AI is instructed to add relevant emojis sparingly for clarity.
 - `dropcomments.apiUrl`: **Custom API URL** (optional). Set a custom base URL for the AI API to use local LLMs or alternative endpoints. Must be OpenAI Chat Completions-compatible. Leave empty to use the default OpenAI endpoint.
+
+### Stale Comments Settings
+- `dropcomments.stale.enable`: **Enable stale comments detection** (default: false). Turn on the sidebar feature for workspace-wide comment analysis.
+- `dropcomments.stale.autoScanOnOpen`: Auto-scan workspace when VS Code opens (default: true when enabled).
+- `dropcomments.stale.maxScanFiles`: Maximum files to scan in one operation (default: 5000). Prevents performance issues in very large workspaces.
+- `dropcomments.stale.scoreThreshold`: Minimum staleness score to flag comments (default: 55). Higher values = fewer, more confident detections.
+- `dropcomments.stale.excludeGlobs`: File patterns to exclude from scanning (default: common build/dist patterns).
+- `dropcomments.stale.batchConcurrency`: Number of concurrent AI regeneration requests (default: 3).
+- `dropcomments.stale.commentOnlyRegeneration`: Generate only comment text vs. full code block (default: true).
+- `dropcomments.stale.showLowConfidence`: Show items slightly below threshold (default: false).
+- `dropcomments.stale.gitHistoryDepth`: Git blame analysis depth for age calculation (default: 20).
 
 ## Custom API URL
 DropComments supports routing AI requests to custom endpoints, enabling the use of local LLMs or alternative AI providers:
@@ -98,7 +128,7 @@ Code:
 
 Set your template in VS Code Settings > DropComments: Prompt Template.
 
-## Features
+## All Features
 - Automatically generate code comments with AI assistance
 - Support for 20+ programming languages with appropriate comment syntax
 - Secure API key storage in VS Code settings
@@ -107,7 +137,12 @@ Set your template in VS Code Settings > DropComments: Prompt Template.
 - Optional emoji-enhanced comments (toggle via setting)
 - **Right-click context menu integration for quick commenting**
 - **Customizable AI model and comment style settings for full control over output**
-- Custom prompt templates
+- **Custom prompt templates for personalized AI interactions**
+- **🆕 Stale Comments Sidebar - Workspace-wide comment maintenance with AI**
+  - Intelligent staleness detection with configurable scoring
+  - Batch regeneration and safe application of updates
+  - Performance-optimized for large codebases
+  - Seamless integration with existing AI settings
 
 Stay tuned for more impressive features!
 
